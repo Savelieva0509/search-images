@@ -3,84 +3,91 @@ import api from './services/api';
 import ImageGallery from './ImageGallery/ImageGallery';
 import Modal from './Modal/Modal';
 import Searchbar from './Searchbar/Searchbar';
-import { Component } from 'react';
+import { useState, useEffect} from 'react';
 import Loader from './Loader/Loader';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-class App extends Component {
-  state = {
-    page: 1,
-    query: '',
-    photos: [],
-    isLoading: false,
-    showModal: '',
-    largeImage: '',
-    totalPages: 0,
-  };
-
-  async componentDidUpdate(_, prevState) {
-    if (
-      this.state.query !== prevState.query ||
-      this.state.page !== prevState.page
-    ) {
-      const { query, page } = this.state;
-      this.setState({ isLoading: true });
-
-      const response = await api
-        .fetchImages(query, page)
-        .catch(error => this.setState({ error }))
-        .finally(() => this.setState({ isLoading: false }));
-      if (response.data.totalHits === 0) {
-        toast('Enter correct name!');
-        this.setState({ images: [] });
-        return;
-      }
-
-      response.data.hits.map(({ id, webformatURL, largeImageURL, tags }) => {
-        return this.setState(prev => ({
-          photos: [...prev.photos, { id, webformatURL, largeImageURL, tags }],
-          totalPages: Math.ceil(response.data.totalHits / 12),
-        }));
-      });
+function App () {
+  const [page, setPage] = useState(1);
+  const [query, setQuery] = useState('');
+  const [photos, setPhotos] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showModal, setShowModal] = useState('');
+  const [largeImage, setLargeImage] = useState('');
+  const [totalPages, setTotalPages] = useState(0);
+  const [setError] = useState(null);
+  
+ useEffect(() => {
+    if (query === '') {
+      return;
     }
-  }
 
-  handleSubmit = name => {
-    this.setState({ query: name, photos: [], page: 1 });
+    try {
+      setIsLoading(true);
+      const response = api
+        .fetchImages(query, page)
+        .finally(() => setIsLoading(false));
+
+      response.then(photos => {
+        if (photos.data.totalHits === 0) {
+          toast('Enter correct request');
+          setPhotos([]);
+          return;
+        }
+        
+        console.log(photos);
+        photos.data.hits.forEach(
+          ({ id, webformatURL, largeImageURL, tags }) => {
+            setPhotos(prev => [
+              ...prev,
+              { id, webformatURL, largeImageURL, tags },
+            ]);
+            setTotalPages(Math.ceil(photos.data.totalHits / 12));
+            setIsLoading(false);
+          }
+        );
+      });
+    } catch (error) {
+      setError(error);
+      setIsLoading(false);
+    }
+}, [query, page, setError]);
+  
+  const handleSubmit = name => {
+    setQuery(name);
+    setPhotos([]);
+    setPage(1);
   };
 
-  loadMore = () => {
-    this.setState(prevState => ({ page: prevState.page + 1 }));
+
+  const loadMore = () => {
+    setPage(prevState => prevState.page + 1);
   };
 
-  onClick = photo => {
-    this.setState({ largeImage: photo, showModal: true });
+  const onClick = photo => {
+    setLargeImage(photo);
+    setShowModal(true);
   };
 
-  onModalClose = () => {
-    this.setState(prevState => ({
-      showModal: !prevState.showModal,
-    }));
+  const onModalClose = () => {
+    setShowModal(prev => !prev);
   };
 
-  render() {
-    const { isLoading, showModal, photos, largeImage, totalPages, page } =
-      this.state;
     return (
       <div>
-        <Searchbar onSubmit={this.handleSubmit} />
+        <Searchbar onSubmit={handleSubmit} />
         {isLoading && <Loader />}
-        {showModal && <Modal src={largeImage} onClose={this.onModalClose} />}
-        {this.state.photos.length > 0 && (
-          <ImageGallery items={photos} onClick={this.onClick} />
+        {showModal && <Modal src={largeImage} onClose={onModalClose} />}
+        {photos.length > 0 && (
+          <ImageGallery items={photos} onClick={onClick} />
         )}
         {photos.length !== 0 && totalPages > page && (
-          <Button onLoadMore={this.loadMore} />
+          <Button onLoadMore={loadMore} />
         )}
         <ToastContainer autoClose={3000} />
       </div>
     );
   }
-}
+
 export default App;

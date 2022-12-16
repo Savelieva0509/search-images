@@ -1,33 +1,30 @@
-import { Component } from 'react';
+import { useState } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { CgSearchLoading } from 'react-icons/cg';
 import css from './Searchbar.module.css';
 
-class Searchbar extends Component {
-  state = {
-    imgName: '',
+ function Searchbar ({onSubmit}) {
+  const [imgName, setImgName] = useState('')
+
+  const handleChange = event => {
+    setImgName(event.currentTarget.value.toLowerCase());
   };
 
-  handleChange = event => {
-    this.setState({ imgName: event.currentTarget.value.toLowerCase() });
-  };
-
-  handleSubmit = event => {
+  const handleSubmit = event => {
     event.preventDefault();
 
-    if (this.state.imgName.trim() === '') {
+    if (imgName.trim() === '') {
       toast('Enter the name!');
       return;
     }
 
-    this.props.onSubmit(this.state.imgName);
-    this.setState({ imgName: '' });
+    onSubmit(imgName);
+    setImgName('');
   };
 
-  render() {
     return (
-      <header className={css.searchbar} onSubmit={this.handleSubmit}>
+      <header className={css.searchbar} onSubmit={handleSubmit}>
         <form className={css.searchForm}>
           <button type="submit" className={css.searchFormButton}>
             <CgSearchLoading
@@ -42,14 +39,13 @@ class Searchbar extends Component {
             type="text"
             name="imgName"
             placeholder="Search images and photos"
-            value={this.state.imgName}
-            onChange={this.handleChange}
+            value={imgName}
+            onChange={handleChange}
           />
         </form>
         <ToastContainer autoClose={3000} />
       </header>
     );
   }
-}
 
 export default Searchbar;
