@@ -3,12 +3,12 @@ import api from './services/api';
 import ImageGallery from './ImageGallery/ImageGallery';
 import Modal from './Modal/Modal';
 import Searchbar from './Searchbar/Searchbar';
-import { useState, useEffect} from 'react';
+import { useState, useEffect } from 'react';
 import Loader from './Loader/Loader';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-function App () {
+function App() {
   const [page, setPage] = useState(1);
   const [query, setQuery] = useState('');
   const [photos, setPhotos] = useState([]);
@@ -17,8 +17,8 @@ function App () {
   const [largeImage, setLargeImage] = useState('');
   const [totalPages, setTotalPages] = useState(0);
   const [setError] = useState(null);
-  
- useEffect(() => {
+
+  useEffect(() => {
     if (query === '') {
       return;
     }
@@ -35,7 +35,7 @@ function App () {
           setPhotos([]);
           return;
         }
-        
+
         console.log(photos);
         photos.data.hits.forEach(
           ({ id, webformatURL, largeImageURL, tags }) => {
@@ -52,14 +52,13 @@ function App () {
       setError(error);
       setIsLoading(false);
     }
-}, [query, page, setError]);
-  
+  }, [query, page, setError]);
+
   const handleSubmit = name => {
     setQuery(name);
     setPhotos([]);
     setPage(1);
   };
-
 
   const loadMore = () => {
     setPage(prevState => prevState.page + 1);
@@ -74,20 +73,18 @@ function App () {
     setShowModal(prev => !prev);
   };
 
-    return (
-      <div>
-        <Searchbar onSubmit={handleSubmit} />
-        {isLoading && <Loader />}
-        {showModal && <Modal src={largeImage} onClose={onModalClose} />}
-        {photos.length > 0 && (
-          <ImageGallery items={photos} onClick={onClick} />
-        )}
-        {photos.length !== 0 && totalPages > page && (
-          <Button onLoadMore={loadMore} />
-        )}
-        <ToastContainer autoClose={3000} />
-      </div>
-    );
-  }
+  return (
+    <div>
+      <Searchbar onSubmit={handleSubmit} />
+      {isLoading && <Loader />}
+      {showModal && <Modal src={largeImage} onClose={onModalClose} />}
+      {photos.length > 0 && <ImageGallery items={photos} onClick={onClick} />}
+      {photos.length !== 0 && totalPages > page && (
+        <Button onLoadMore={loadMore} />
+      )}
+      <ToastContainer autoClose={3000} />
+    </div>
+  );
+}
 
 export default App;
