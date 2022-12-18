@@ -14,6 +14,19 @@ function Modal({ src, onClose }) {
     return () => document.removeEventListener('keydown', handleModal);
   }, [onClose]);
 
+
+  // componentDidMount() {
+  //   document.addEventListener('keydown', this.handleModal);
+  // }
+  // componentWillUnmount() {
+  //   document.removeEventListener('keydown', this.handleModal);
+  // }
+  // handleModal = evt => {
+  //   if (evt.code === 'Escape') {
+  //     this.props.onClose();
+  //   }
+  // };
+
   const backdropClick = evt => {
     if (evt.target === evt.currentTarget) {
       onClose();
