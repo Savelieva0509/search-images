@@ -36,7 +36,6 @@ function App() {
           return;
         }
 
-        console.log(photos);
         photos.data.hits.forEach(
           ({ id, webformatURL, largeImageURL, tags }) => {
             setPhotos(prev => [
